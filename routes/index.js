@@ -1,5 +1,5 @@
 var crypto = require('crypto'),
-User = require('../models/user.js');
+               User = require('../models/user.js');
 var express = require('express');
 var app = express.Router();
 var flash = require('connect-flash');
@@ -8,13 +8,13 @@ var Post = require('../models/post.js');
 /* GET home page. */
 
 app.get('/', function (req, res) {
-               Post.get(null, function(err, posts) {
+               Post.getAll(null, function (err, posts) {
                               if (err) {
                                              posts = [];
                               }
                               res.render('index', { title: '主页',
                                              user: req.session.user,
-                                             posts:posts,
+                                             posts: posts,
                                              success: req.flash('success').toString(),
                                              error: req.flash('error').toString()});
                });
@@ -22,10 +22,10 @@ app.get('/', function (req, res) {
 
 });
 app.get('/login', checkNotLogin);
-app.get('/login', function (req, res,posts) {
+app.get('/login', function (req, res, posts) {
                res.render('login', { title: '登录',
                               user: req.session.user,
-                              posts:posts,
+                              posts: posts,
                               success: req.flash('success').toString(),
                               error: req.flash('error').toString()});
 });
@@ -67,7 +67,7 @@ app.post('/login', function (req, res) {
 app.post('/reg', checkNotLogin);
 app.post('/reg', function (req, res) {
                console.log("1");
-                              var name = req.body.name,
+               var name = req.body.name,
                               password = req.body.password,
                               re_password = req.body['repeat-password'];
                if (re_password != password) {
@@ -145,14 +145,71 @@ app.get('/logout', function (req, res) {
                return res.redirect('/');
 });
 
-function checkNotLogin(req, res,next) {
+
+app.get('/upload', checkLogin);
+app.get('/upload', function (req, res) {
+               res.render('upload', {
+                              title: 'upload files',
+                              user: req.session.user,
+                              success: req.flash('success').toString(),
+                              error: req.flash('error').toString()});
+});
+
+app.post('/upload', checkLogin);
+app.post('/upload', function (req, res) {
+               //req.session.user = null;
+               req.flash('success', 'upload OK');
+               res.redirect('/upload');
+});
+
+app.get('/u/:name', function (req, res) {
+               User.get(req.param.name, function (err, user) {
+                              if (!user) {
+                                             req.flash('error', err);
+                                             return res.redirect('/');
+                              }
+                              Post.getAll(user, function (err, posts) {
+                                             if (err) {
+                                                            req.flash('error', err);
+                                                            return res.redirect('/');
+                                             }
+                                             res.render('user', {
+                                                            name: user.name,
+                                                            posts: posts,
+                                                            user: req.session.user,
+                                                            success: req.flash('success').toString(),
+                                                            error: req.flash('error').toString()
+                                             });
+
+                              })
+               });
+});
+
+app.get('/u/:name/:title/:day', function (req, res) {
+               User.get(req.param.name, req.param.title, req.param.day, function (err, post) {
+                              if (err) {
+                                             req.flash('error', err);
+                                             return res.redirect('/');
+                              }
+                              res.render('post', {
+                                             name: req.params.title,
+                                             post: post,
+                                             user: req.session.user,
+                                             success: req.flash('success').toString(),
+                                             error: req.flash('error').toString()
+                              });
+               });
+});
+
+
+function checkNotLogin(req, res, next) {
                if (req.session.user) {
                               req.flash('error', 'already login');
                               return res.redirect('back');
                }
                next();
 }
-function checkLogin(req, res,next) {
+function checkLogin(req, res, next) {
                if (!req.session.user) {
                               req.flash('error', 'Not login');
                               return res.redirect('/login');

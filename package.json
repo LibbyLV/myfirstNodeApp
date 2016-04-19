@@ -20,7 +20,9 @@
     "mongodb":"1.4.40",
     "bson":"0.2.5",
     "passport": "^0.2.2",
-    "passport-steam": "^0.1.6"
+    "passport-steam": "^0.1.6",
+    "markdown": "0.5.0",
+    "multer": "0.1.6"
 
   }
 }

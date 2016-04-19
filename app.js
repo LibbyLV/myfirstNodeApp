@@ -12,9 +12,16 @@ var users = require('./routes/users');
 var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
 var flash = require('connect-flash');
-
-
 var app = express();
+var multer = require('multer');
+app.use(multer({
+               dest: './public/images',
+               rename: function(fieldname,filename){
+                              return filename;
+               }
+}));
+
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
