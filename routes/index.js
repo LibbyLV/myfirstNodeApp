@@ -186,7 +186,9 @@ app.get('/u/:name', function (req, res) {
 });
 
 app.get('/u/:name/:title/:day', function (req, res) {
-               User.get(req.param.name, req.param.title, req.param.day, function (err, post) {
+    console.log(req.param.name+"-"+ req.param.title+"-"+ req.param.day);
+               Post.getOne(req.param.name, req.param.title, req.param.day, function (err, post) {
+                              console.log(req.param.title+" "+req.param.day );
                               if (err) {
                                              req.flash('error', err);
                                              return res.redirect('/');
