@@ -2,7 +2,7 @@
  * Created by tianan on 2016-4-15.
  */
 var mongodb = require('./db'),
- markdown = require('markdown').markdown;
+               markdown = require('markdown').markdown;
 
 
 function Post(name, title, post) {
@@ -81,8 +81,7 @@ Post.getAll = function (name, callback) {
 };
 
 
-
-Post.getOne = function (name, day,title,callback) {
+Post.getOne = function (name, title, day, callback) {
 
                mongodb.open(function (err, db) {
                               if (err) {
@@ -95,16 +94,19 @@ Post.getOne = function (name, day,title,callback) {
                                              }
 
                                              collection.findOne({
-                                                            "name":name,
-                                                            "time.day":day,
-                                                            "title":title
-                                             },function(err,doc){
-                                                if(err){
-                                                               //mongodb.close();
-                                                             return callback(err);
-                                                }
-                                                doc.post = markdown.toHTML(doc.post);
-                                                callback(null,doc);
+                                                            "name": name,
+                                                            "title": title,
+                                                            "time.day": day
+                                             }, function (err, doc) {
+                                                            if (err) {
+                                                                           //mongodb.close();
+                                                                           return callback(err);
+                                                            }
+                                                            console.log("doc" + doc);
+                                                            doc.post = markdown.toHTML(doc.post);
+
+
+                                                            callback(null, doc);
                                              });
                               });
                });

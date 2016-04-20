@@ -163,18 +163,19 @@ app.post('/upload', function (req, res) {
 });
 
 app.get('/u/:name', function (req, res) {
-               User.get(req.param.name, function (err, user) {
+               User.get(req.params.name, function (err, user) {
                               if (!user) {
                                              req.flash('error', err);
                                              return res.redirect('/');
                               }
-                              Post.getAll(user, function (err, posts) {
+                              Post.getAll(user.name, function (err, posts) {
                                              if (err) {
                                                             req.flash('error', err);
                                                             return res.redirect('/');
                                              }
+                                             console.log("posts"+JSON.stringify(posts));
                                              res.render('user', {
-                                                            name: user.name,
+                                                            title: user.name,
                                                             posts: posts,
                                                             user: req.session.user,
                                                             success: req.flash('success').toString(),
@@ -186,15 +187,15 @@ app.get('/u/:name', function (req, res) {
 });
 
 app.get('/u/:name/:title/:day', function (req, res) {
-    console.log(req.param.name+"-"+ req.param.title+"-"+ req.param.day);
-               Post.getOne(req.param.name, req.param.title, req.param.day, function (err, post) {
-                              console.log(req.param.title+" "+req.param.day );
+    //console.log(req.param.name+"-"+ req.param.title+"-"+ req.param.day);
+               Post.getOne(req.params.name, req.params.title, req.params.day, function (err, post) {
+                              console.log(req.params.title+" "+req.params.day );
                               if (err) {
                                              req.flash('error', err);
                                              return res.redirect('/');
                               }
-                              res.render('post', {
-                                             name: req.params.title,
+                              res.render('article', {
+                                             title: req.params.title,
                                              post: post,
                                              user: req.session.user,
                                              success: req.flash('success').toString(),
