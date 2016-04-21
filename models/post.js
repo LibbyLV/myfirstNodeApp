@@ -9,6 +9,7 @@ function Post(name, title, post) {
                this.name = name;
                this.title = title;
                this.post = post;
+
 }
 module.exports = Post;
 //存储一篇文章及其相关信息
@@ -27,7 +28,8 @@ Post.prototype.save = function (callback) {
                               name: this.name,
                               title: this.title,
                               time: time,
-                              post: this.post
+                              post: this.post,
+                              comments:[]
                }
 
                mongodb.open(function (err, db) {
@@ -103,10 +105,112 @@ Post.getOne = function (name, title, day, callback) {
                                                                            return callback(err);
                                                             }
                                                             console.log("doc" + doc);
-                                                            doc.post = markdown.toHTML(doc.post);
+                                                            if(doc){
+                                                               doc.post = markdown.toHTML(doc.post);
+                                                               doc.comments.forEach(function(comment){
+                                                                              comment.content = markdown.toHTML(comment.content);
+
+                                                               });
+                                                            }
+
 
 
                                                             callback(null, doc);
+                                             });
+                              });
+               });
+};
+
+
+Post.edit = function (name, title, day, callback) {
+
+               mongodb.open(function (err, db) {
+                              if (err) {
+                                             return callback(err);
+                              }
+                              db.collection('posts', function (err, collection) {
+                                             if (err) {
+                                                            mongodb.close();
+                                                            return callback(err);
+                                             }
+
+                                             collection.findOne({
+                                                            "name": name,
+                                                            "title": title,
+                                                            "time.day": day
+                                             }, function (err, doc) {
+                                                            if (err) {
+                                                                           //mongodb.close();
+                                                                           return callback(err);
+                                                            }
+                                                            console.log("doc" + doc);
+                                                            ///doc.post = markdown.toHTML(doc.post);
+
+
+                                                            callback(null, doc);
+                                             });
+                              });
+               });
+};
+
+
+Post.update = function (name, title, day, post, callback) {
+
+               mongodb.open(function (err, db) {
+                              if (err) {
+                                             return callback(err);
+                              }
+                              db.collection('posts', function (err, collection) {
+                                             if (err) {
+                                                            mongodb.close();
+                                                            return callback(err);
+                                             }
+
+                                             collection.update({
+                                                            "name": name,
+                                                            "title": title,
+                                                            "time.day": day
+                                             }, {
+                                                            $set: {post: post}
+                                             }, function (err) {
+                                                            mongodb.close();
+                                                            if (err) {
+                                                                           //mongodb.close();
+                                                                    return callback(err);
+                                                            }
+
+
+                                                            callback(null);
+                                             });
+                              });
+               });
+};
+
+Post.remove = function (name, title, day,  callback) {
+
+               mongodb.open(function (err, db) {
+                              if (err) {
+                                             return callback(err);
+                              }
+                              db.collection('posts', function (err, collection) {
+                                             if (err) {
+                                                            mongodb.close();
+                                                            return callback(err);
+                                             }
+
+                                             collection.remove({
+                                                            "name": name,
+                                                            "title": title,
+                                                            "time.day": day
+                                             }, {
+                                                            w: 1
+                                             }, function (err) {
+                                                            mongodb.close();
+                                                            if (err) {
+                                                                           //mongodb.close();
+                                                                           return callback(err);
+                                                            }
+                                                            callback(null);
                                              });
                               });
                });

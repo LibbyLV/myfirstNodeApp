@@ -203,6 +203,53 @@ app.get('/u/:name/:title/:day', function (req, res) {
                               });
                });
 });
+app.get('/edit/:name/:title/:day',checkLogin);
+app.get('/edit/:name/:title/:day',function(req,res){
+               var currrentUser = req.session.user;
+               Post.edit(currrentUser.name, req.params.title, req.params.day, function (err, post) {
+                              //console.log(req.params.title+" "+req.params.day );
+                              if (err) {
+                                             req.flash('error', err);
+                                             return res.redirect('/');
+                              }
+                              res.render('edit', {
+                                             title: 'EDIT',
+                                             post: post,
+                                             user: req.session.user,
+                                             success: req.flash('success').toString(),
+                                             error: req.flash('error').toString()
+                              });
+               });
+});
+
+app.post('/edit/:name/:title/:day',checkLogin);
+app.post('/edit/:name/:title/:day',function(req,res){
+               var currrentUser = req.session.user;
+         Post.update(currrentUser.name,req.params.title,req.params.day,req.body.post,function(err){
+              var url = encodeURI('/u/'+req.params.name+'/'+req.params.title+'/'+req.params.day);
+                        if(err){
+                               req.flash('error',err);
+                               return res.redirect(url);
+                        }
+                        req.flash('success','CHANGE SUCCESS');
+                        res.redirect(url);
+         })
+});
+
+app.get('/remove/:name/:title/:day',checkLogin);
+app.get('/remove/:name/:title/:day',function(req,res){
+               var currrentUser = req.session.user;
+               Post.remove(currrentUser.name, req.params.title, req.params.day, function (err) {
+                              //console.log(req.params.title+" "+req.params.day );
+                              if(err){
+                                             req.flash('error',err);
+                                             return res.redirect('back');
+                              }
+                              req.flash('success','REMOVE SUCCESS');
+                              res.redirect('/');
+
+               });
+});
 
 
 function checkNotLogin(req, res, next) {

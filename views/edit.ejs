@@ -1,0 +1,14 @@
+
+<%- include header %>
+<form  method="post" action="/edit/<%=post.name%>/<%= post.title %>/<%= post.time.day %>">
+TITLE <br/>
+<input type="text" name="title" value="<%= post.title %>" disabled="disabled" /><br />
+
+PASSAGE
+<textarea name="post" rows="20" cols="100"><%=post.post%></textarea><br/>
+        <input type="submit" value="SAVE CHANGE"/>
+
+</form>
+
+
+<%- include footer %>
