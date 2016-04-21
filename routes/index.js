@@ -4,6 +4,7 @@ var express = require('express');
 var app = express.Router();
 var flash = require('connect-flash');
 var Post = require('../models/post.js');
+var Comment =require('../models/comment.js');
 
 /* GET home page. */
 
@@ -249,6 +250,28 @@ app.get('/remove/:name/:title/:day',function(req,res){
                               res.redirect('/');
 
                });
+});
+
+app.post('/u/:name/:title/:day',function(req,res){
+    var date = new Date(),
+        time = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate()+" "
+               +date.getHours()+(date.getMinutes()<10?"0"+date.getMinutes():date.getMinutes())
+    var comment = {
+        name:req.body.name,
+        email:req.body.email,
+        website:req.body.website,
+        time:time,
+        comment:req.body.content
+    };
+    var newComment = new Comment(req.params.name, req.params.day,req.params.title, comment);
+    newComment.save(function(err,cb){
+       if(err){
+           req.flash('error','err');
+           return res.redirect('back')
+       }
+        req.flash('success', 'REPLY OK');
+        return res.redirect('back');
+    });
 });
 
 

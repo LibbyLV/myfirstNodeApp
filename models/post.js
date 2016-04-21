@@ -23,14 +23,14 @@ Post.prototype.save = function (callback) {
                               minute: date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate() + " " + date.getHours() + ":" +
                                              (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes())
 
-               }
+               };
                var post = {
                               name: this.name,
                               title: this.title,
                               time: time,
                               post: this.post,
                               comments:[]
-               }
+               };
 
                mongodb.open(function (err, db) {
                               if (err) {
@@ -50,7 +50,7 @@ Post.prototype.save = function (callback) {
                                              });
                               });
                });
-}
+};
 //读取文章及其相关信息
 Post.getAll = function (name, callback) {
 
