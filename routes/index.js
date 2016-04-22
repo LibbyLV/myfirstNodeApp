@@ -9,13 +9,17 @@ var Comment =require('../models/comment.js');
 /* GET home page. */
 
 app.get('/', function (req, res) {
-               Post.getAll(null, function (err, posts) {
+               var page = parseInt(req.query.p)||1;
+               Post.getTen(null,page, function (err, posts,total) {
                               if (err) {
                                              posts = [];
                               }
                               res.render('index', { title: '主页',
                                              user: req.session.user,
                                              posts: posts,
+                                             page:page,
+                                             isFirstPage:(page-1)==0,
+                                             isLastPage:((page - 1) * 10 + posts.length) == total,
                                              success: req.flash('success').toString(),
                                              error: req.flash('error').toString()});
                });
@@ -164,12 +168,13 @@ app.post('/upload', function (req, res) {
 });
 
 app.get('/u/:name', function (req, res) {
+               var page = parseInt(req.query.p)||1;
                User.get(req.params.name, function (err, user) {
                               if (!user) {
                                              req.flash('error', err);
                                              return res.redirect('/');
                               }
-                              Post.getAll(user.name, function (err, posts) {
+                              Post.getTen(user.name,page, function (err, posts) {
                                              if (err) {
                                                             req.flash('error', err);
                                                             return res.redirect('/');
@@ -255,22 +260,22 @@ app.get('/remove/:name/:title/:day',function(req,res){
 app.post('/u/:name/:title/:day',function(req,res){
     var date = new Date(),
         time = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate()+" "
-               +date.getHours()+(date.getMinutes()<10?"0"+date.getMinutes():date.getMinutes())
+               +date.getHours()+(date.getMinutes()<10?"0"+date.getMinutes():date.getMinutes());
     var comment = {
         name:req.body.name,
         email:req.body.email,
         website:req.body.website,
         time:time,
-        comment:req.body.content
+        content:req.body.content
     };
     var newComment = new Comment(req.params.name, req.params.day,req.params.title, comment);
-    newComment.save(function(err,cb){
+    newComment.save(function(err){
        if(err){
            req.flash('error','err');
-           return res.redirect('back')
+           return res.redirect('back');
        }
         req.flash('success', 'REPLY OK');
-        return res.redirect('back');
+        res.redirect('back');
     });
 });
 

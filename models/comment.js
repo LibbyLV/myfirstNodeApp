@@ -30,9 +30,9 @@ Comment.prototype.save = function (callback) {
             }
             //通过用户名、时间及标题查找文档，并把一条留言对象添加到该文档的 comments 数组里
             collection.update({
-                name:name,
-                title:title,
-                day:day
+                "name":name,
+                "title":title,
+                "time.day":day
             },{
                 $push :{"comments":comment}
             }, function (err) {

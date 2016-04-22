@@ -29,7 +29,7 @@ Post.prototype.save = function (callback) {
                               title: this.title,
                               time: time,
                               post: this.post,
-                              comments:[]
+                              comments: []
                };
 
                mongodb.open(function (err, db) {
@@ -52,7 +52,7 @@ Post.prototype.save = function (callback) {
                });
 };
 //读取文章及其相关信息
-Post.getAll = function (name, callback) {
+Post.getTen = function (name, page,callback) {
 
                mongodb.open(function (err, db) {
                               if (err) {
@@ -67,17 +67,23 @@ Post.getAll = function (name, callback) {
                                              if (name) {
                                                             query.name = name;
                                              }
-                                             collection.find(query).sort({time: -1}).toArray(function (err, docs) {
-                                                            mongodb.close();
-                                                            if (err) {
-                                                                           return callback(err);
-                                                            }
-                                                            //解析 markdown 为 html
-                                                            docs.forEach(function (doc) {
-                                                                           doc.post = markdown.toHTML(doc.post);
+                                             collection.count(query,function(err,total){
+                                                            collection.find(query,{skip:(page-1)*10,limit:10}).sort({time: -1}).toArray(function (err, docs) {
+                                                                           mongodb.close();
+                                                                           if (err) {
+                                                                                          return callback(err);
+                                                                           }
+                                                                           //解析 markdown 为 html
+                                                                           docs.forEach(function (doc) {
+                                                                                          doc.post = markdown.toHTML(doc.post);
+                                                                           });
+                                                                           callback(null, docs,total);
                                                             });
-                                                            callback(null, docs);
-                                             });
+                                             })
+
+
+
+
                               });
                });
 };
@@ -104,17 +110,16 @@ Post.getOne = function (name, title, day, callback) {
                                                                            //mongodb.close();
                                                                            return callback(err);
                                                             }
-                                                            console.log("doc" + doc);
+                                                            console.log("doc" + JSON.stringify(doc));
                                                             if(doc){
                                                                doc.post = markdown.toHTML(doc.post);
+                                                               console.log("doc post is "+doc.post);
+                                                               console.log("doc comments is "+doc.comments);
                                                                doc.comments.forEach(function(comment){
-                                                                              comment.content = markdown.toHTML(comment.content);
+                                                               comment.content = markdown.toHTML(comment.content);
 
                                                                });
-                                                            }
-
-
-
+                                                           }
                                                             callback(null, doc);
                                              });
                               });

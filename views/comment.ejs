@@ -1,15 +1,11 @@
 
-<%- include header %>
-HOME PAGE
+<% post.comments.forEach(function (comment) { %>
+<p><a href="<%= comment.website %>"><%= comment.name %></a>
+<span class="info"> REPLY AT <%= comment.time %></span></p>
+<p><%- comment.content %></p>
+<% }) %>
 
-<% posts.comments.forEach(function (post, index) { %>
-<p><h2><a href="<%=comment.website%>"><%=comment.name%></a></h2>
-<span class="info">REPLY TO <%=comment.time%></span></p>
-<p><%-comment.comment%></p>
-<!--<script>-->
-        <!--<!%  alert(post);-->
-<!--</script>-->
-<form method="post" action ="/u/<%= post.name %>/<%= post.time.day %>/<%= post.title %>">
+<form method="post" action="/u/<%= post.name %>/<%= post.time.day %>/<%= post.title %>">
         <% if (user) { %>
         姓名：<input type="text" name="name" value="<%= user.name %>" /><br />
         邮箱：<input type="text" name="email" value="<%= user.email %>" /><br />
@@ -23,6 +19,6 @@ HOME PAGE
         <input type="submit" value="LEAVE MESSAGE" />
 
 </form>
-<% }) %>
 
-<%- include footer %>
+
+

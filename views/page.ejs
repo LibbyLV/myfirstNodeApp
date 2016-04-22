@@ -1,0 +1,11 @@
+
+<br/>
+
+<div>
+        <%if(!isFirstPage){%>
+           <span class="prepage"><a title="FirstPage" href="?p=<%=page-1%>">prePage</a></span>
+        <%}%>
+        <%if(!isLastPage){%>
+        <span class="nextpage"><a title="NextPage" href="?p=<%=page+1%>">nextPage</a></span>
+        <%}%>
+</div>
