@@ -174,7 +174,7 @@ app.get('/u/:name', function (req, res) {
                                              req.flash('error', err);
                                              return res.redirect('/');
                               }
-                              Post.getTen(user.name,page, function (err, posts) {
+                              Post.getTen(user.name,page, function (err, posts,total) {
                                              if (err) {
                                                             req.flash('error', err);
                                                             return res.redirect('/');
@@ -184,6 +184,8 @@ app.get('/u/:name', function (req, res) {
                                                             title: user.name,
                                                             posts: posts,
                                                             user: req.session.user,
+                                                            isFirstPage:(page-1)==0,
+                                                            isLastPage:((page - 1) * 10 + posts.length) == total,
                                                             success: req.flash('success').toString(),
                                                             error: req.flash('error').toString()
                                              });
