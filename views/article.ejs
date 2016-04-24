@@ -1,8 +1,5 @@
 
 <%- include header %>
-HOME PAGE
-
-
 <p>
         <% if(user&&(user.name == post.name)){%>
         <span><a class="edit" href="/edit/<%=post.name%>/<%= post.title %>/<%= post.time.day %>">EDIT</a></span>
@@ -15,6 +12,8 @@ HOME PAGE
         日期：<%= post.time.minute %>
 </p>
 <p><%- post.post %></p>
+<p class="info">阅读：<%= post.pv %> | 评论：<%= post.comments.length %></p>
+
 
 <%- include comment %>
 <%- include footer %>

@@ -5,10 +5,10 @@ var mongodb = require('./db'),
                markdown = require('markdown').markdown;
 
 
-function Comment(name, day,title, comment) {
+function Comment(name, title,day, comment) {
                this.name = name;
-               this.day = day;
                this.title = title;
+               this.day = day;
                this.comment = comment;
 
 }
@@ -40,8 +40,9 @@ Comment.prototype.save = function (callback) {
                 if (err) {
                     return callback(err);
                 }
+                //console.log("comments: "+comments);
                 callback(null);
             });
         });
     });
-}
+};

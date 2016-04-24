@@ -1,11 +1,11 @@
-
-<% post.comments.forEach(function (comment) { %>
+<br/>
+<% post.comments.forEach(function (comment,index) { %>
 <p><a href="<%= comment.website %>"><%= comment.name %></a>
 <span class="info"> REPLY AT <%= comment.time %></span></p>
 <p><%- comment.content %></p>
 <% }) %>
 
-<form method="post" action="/u/<%= post.name %>/<%= post.time.day %>/<%= post.title %>">
+<form method="post" action="/u/<%= post.name %>/<%= post.title %>/<%= post.time.day %>">
         <% if (user) { %>
         姓名：<input type="text" name="name" value="<%= user.name %>" /><br />
         邮箱：<input type="text" name="email" value="<%= user.email %>" /><br />
