@@ -35,7 +35,9 @@ Post.prototype.save = function (callback) {
         post: this.post,
         tags: this.tags,
         comments: [],
+        reprint_info:{},
         pv: 0
+
     };
 
     mongodb.open(function (err, db) {
@@ -362,5 +364,100 @@ Post.search = function (keyword, callback) {
                               });
                });
 };
+
+
+
+Post.reprint = function (reprint_from, reprint_to,  callback) {
+
+               mongodb.open(function (err, db) {
+                              if (err) {
+                                             return callback(err);
+                              }
+                              db.collection('posts', function (err, collection) {
+                                             if (err) {
+                                                            mongodb.close();
+                                                            return callback(err);
+                                             }
+
+                              // /* name: this.name,
+                                            /* head: this.head,
+                                                            title: this.title,
+                                                            time: time,
+                                                            post: this.post,
+                                                            tags: this.tags,
+                                                            comments: [],
+                                                            reprint_info:{},
+                                             pv: 0*/
+                              // */
+
+
+                                             //找到被转载的文章的原文档/*
+                                             collection.findOne({
+                                                            "name": reprint_from.name,
+                                                            "title": reprint_from.title,
+                                                            "time.day": reprint_from.day
+                                             }, function (err, doc) {
+                                                            if (err) {
+                                                                           mongodb.close();
+                                                                           return callback(err);
+                                                            }
+                                                            console.log("doc" + JSON.stringify(doc));
+                                                            delete doc._id;//注意要删掉原来的 _id
+
+                                                            var date = new Date(),
+                                                            time = {
+                                                                           date: date,
+                                                                           year: date.getFullYear(),
+                                                                           month: date.getFullYear() + "-" + date.getMonth(),
+                                                                           day: date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate(),
+                                                                           minute: date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate() + " " + date.getHours() + ":" +
+                                                                                          (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes())
+
+                                                            };
+                                                            doc.name = reprint_from.name,
+                                                            doc.head = reprint_from.head,
+                                                            doc.time = time,
+                                                            doc.title = (doc.title.search(/[转载]/) > -1) ? doc.title : "[转载]" + doc.title,
+                                                            doc.comments = [],
+                                                            doc.reprint_info = {"reprint_from":reprint_from},
+                                                            doc.pv = 0;
+
+
+                                                            if (doc) {
+                                                                           //更新被转载的原文档的 reprint_info 内的 reprint_to
+                                                                           collection.update({
+                                                                                          "name": reprint_from.name,
+                                                                                          "time.day": reprint_from.day,
+                                                                                          "title": reprint_from.title
+                                                                           }, {$push:{"reprint_info.reprint_to":{
+                                                                                          "name": doc.name,
+                                                                                          "day": time.day,
+                                                                                          "title": doc.title
+                                                                           }}}, function (err) {
+                                                                                          if (err) {
+
+                                                                                                         req.flash('error', err);
+                                                                                                         return res.redirect('/');
+                                                                                          }
+
+                                                                           });
+
+
+                                                            }
+                                                            //将转载生成的副本修改后存入数据库，并返回存储后的文档
+                                                            collection.insert('doc',{
+                                                                           safe:true
+                                                            },function(err,post){
+                                                                           if(err){
+                                                                               return err;
+                                                                           }
+                                                                           callback(null, post[0]);
+                                                            });
+
+                                             });
+                              });
+               });
+};
+
 
 

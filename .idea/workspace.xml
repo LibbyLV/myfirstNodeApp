@@ -70,8 +70,8 @@
       <file leaf-file-name="post.js" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/models/post.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-3.3566554" vertical-offset="6383" max-vertical-offset="8556">
-              <caret line="192" column="34" selection-start-line="192" selection-start-column="34" selection-end-line="192" selection-end-column="34" />
+            <state vertical-scroll-proportion="0.68600684" vertical-offset="9971" max-vertical-offset="10787">
+              <caret line="451" column="90" selection-start-line="451" selection-start-column="90" selection-end-line="451" selection-end-column="90" />
               <folding />
             </state>
           </provider>
@@ -124,13 +124,13 @@
         <option value="$PROJECT_DIR$/views/links.ejs" />
         <option value="$PROJECT_DIR$/views/404.ejs" />
         <option value="$PROJECT_DIR$/package.json" />
-        <option value="$PROJECT_DIR$/models/post.js" />
         <option value="$PROJECT_DIR$/views/index.ejs" />
         <option value="$PROJECT_DIR$/views/user.ejs" />
         <option value="$PROJECT_DIR$/models/user.js" />
         <option value="$PROJECT_DIR$/routes/index.js" />
         <option value="$PROJECT_DIR$/views/comment.ejs" />
         <option value="$PROJECT_DIR$/public/stylesheets/style.css" />
+        <option value="$PROJECT_DIR$/models/post.js" />
       </list>
     </option>
   </component>
@@ -827,8 +827,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/models/post.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-3.3566554" vertical-offset="6383" max-vertical-offset="8556">
-          <caret line="192" column="34" selection-start-line="192" selection-start-column="34" selection-end-line="192" selection-end-column="34" />
+        <state vertical-scroll-proportion="0.68600684" vertical-offset="9971" max-vertical-offset="10787">
+          <caret line="451" column="90" selection-start-line="451" selection-start-column="90" selection-end-line="451" selection-end-column="90" />
           <folding />
         </state>
       </provider>
