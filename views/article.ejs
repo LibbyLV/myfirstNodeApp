@@ -1,15 +1,37 @@
-
 <%- include header %>
 <p>
-        <% if(user&&(user.name == post.name)){%>
-        <span><a class="edit" href="/edit/<%=post.name%>/<%= post.title %>/<%= post.time.day %>">EDIT</a></span>
-        <span><a class="edit" href="/remove/<%=post.name%>/<%= post.title %>/<%= post.time.day %>">DELETE</a></span>
-        <%}%>
-</p>
+        <% if(user && (user.name == post.name)){ %>
+        <span><a class="edit" href="/edit/<%= post.name %>/<%= post.title %>/<%= post.time.day %>">EDIT</a></span>
+        <span><a class="edit" href="/remove/<%= post.name %>/<%= post.title %>/<%= post.time.day %>">DELETE</a></span>
+        <% } %>
+        <% var flag = 0 %>
+        <% if (user && (user.name != post.name)){ %>
+        <% if ((post.reprint_info.reprint_from != undefined) && (user.name == post.reprint_info.reprint_from.name)) %>
+        <% flag = 0 %>
+        <% } %>
+</p>    <% if ((post.reprint_info.reprint_to != undefined)) { %>
+        <% post.reprint_info.reprint_to.forEach(function (reprint_to, index) { %>
+        <% if (user.name == reprint_to.name) { %>
+        <% flag = 0 %>
+        <% } %>
+        <% }) %>
+        <% } else { %>
+        <% flag = 0 %>
+        <% } %>
+        <% if(flag){%>
+        <span><a class="edit" href="reprint/<%post.name%>/<%=post.title%>/<%=post.time.day%>">REPRINT</a></span>
+<%}%>
+
 
 <p class="info">
+        <%if (post.reprint_info.reprint_from){%>
+        <a href="/u/<%=post.name%>/<%=post.title%>/<%=post.time.day%>">link to original passage</a>
+        <%}%>
         作者：<a href="/u/<%= post.name %>"><%= post.name %></a> |
         日期：<%= post.time.minute %>
+        转载:
+        <%if(){%>
+        <%}%>
 </p>
 <p><%- post.post %></p>
 <p class="info">阅读：<%= post.pv %> | 评论：<%= post.comments.length %></p>

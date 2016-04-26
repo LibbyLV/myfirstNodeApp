@@ -349,6 +349,37 @@ app.get('/remove/:name/:title/:day', function (req, res) {
                });
 });
 
+app.get('/reprint/:name/:day/:title',checkLogin);
+app.get('/reprint/:name/:day/:title',function(req,res) {
+               Post.edit(req.params.name, req.params.title, req.params.day, function (err, post) {
+                              if (err) {
+                                             req.flash('error', err);
+                                             return res.redirect('back');
+                              }
+                              var currentUser = req.session.user;
+                              var reprint_from = {
+                                             name: req.params.name,
+                                             title: post.title,
+                                             day: req.params.day};
+                              var reprint_to = {
+                                             name: currentUser.name,
+                                             head: currentUser.head
+                              };
+                              Post.reprint(reprint_from, reprint_to, function (err, post) {
+                                             if (err) {
+                                                            req.flash('error', err);
+                                                            return res.redirect('back');
+                                             }
+                                             req.flash('success', '转载成功!');
+                                             var url = encodeURI('/u/' + post.name + '/' + post.title + '/' + post.time.day);
+                                             //跳转到转载后的文章页面
+                                             res.redirect(url);
+                              })
+               });
+});
+
+
+
 app.post('/u/:name/:title/:day', function (req, res) {
                var md5 = crypto.createHash('md5'),
                               email_MD5 = md5.update(req.body.email.toLowerCase()).digest('hex'),

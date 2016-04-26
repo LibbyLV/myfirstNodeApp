@@ -7,6 +7,9 @@ HOME PAGE
 <a href="/u/<%= post.name %>"><img src="<%= post.head %>" class="r_head" /></a></p>
 
 <p class="info">
+        <%if (post.reprint_info.reprint_from){%>
+        <a href="/u/<%=post.name%>/<%=post.title%>/<%=post.time.day%>">link to original passage</a>
+        <%}%>
         作者：<a href="u/<%= post.name %>"><%= post.name %></a> |
         日期：<%= post.time.minute %>
         标签:

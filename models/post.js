@@ -435,9 +435,9 @@ Post.reprint = function (reprint_from, reprint_to,  callback) {
                                                                                           "title": doc.title
                                                                            }}}, function (err) {
                                                                                           if (err) {
+                                                                                               mongodb.close();
+                                                                                               return callback(err);
 
-                                                                                                         req.flash('error', err);
-                                                                                                         return res.redirect('/');
                                                                                           }
 
                                                                            });
@@ -445,7 +445,7 @@ Post.reprint = function (reprint_from, reprint_to,  callback) {
 
                                                             }
                                                             //将转载生成的副本修改后存入数据库，并返回存储后的文档
-                                                            collection.insert('doc',{
+                                                            collection.insert(doc,{
                                                                            safe:true
                                                             },function(err,post){
                                                                            if(err){
