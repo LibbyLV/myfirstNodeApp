@@ -12,7 +12,7 @@
 
 <p class="info">
         <%if (post.reprint_info.reprint_from){%>
-                <a href="/u/<%=post.name%>/<%=post.title%>/<%=post.time.day%>">link to original passage</a>
+        <a href="/u/<%=post.name%>/<%=post.title%>/<%=post.time.day%>">link to original passage</a>
         <%}%>
         作者：<a href="/u/<%= post.name %>"><%= post.name %></a> |
         日期：<%= post.time.minute %>
@@ -22,10 +22,16 @@
         <a class="tag" href="/tags/<%= tag %>"><%= tag %></a>
         <% } %>
         <% }) %>
+
 </p>
 <p><%- post.post %></p>
 <p class="info">阅读：<%= post.pv %> | 评论：<%= post.comments.length %></p>
-
+转载:
+<%if(post.reprint_info.reprint_to){%>
+<%=post.reprint_info.reprint_to.length %>
+<%}else{%>
+<%=0 %>
+<%}%>
 <% }) %>
 <%- include paging %>
 <%- include footer %>

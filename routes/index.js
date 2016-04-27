@@ -9,11 +9,12 @@ var Comment = require('../models/comment.js');
 /* GET home page. */
 
 app.get('/', function (req, res) {
-               var page = parseInt(req.query.p) || 1;
+               var page = req.query.p ? parseInt(req.query.p) : 1;
                Post.getTen(null, page, function (err, posts, total) {
                               if (err) {
                                              posts = [];
                               }
+                              console.log("posts is "+JSON.stringify(posts));
                               res.render('index', { title: '主页',
                                              posts: posts,
                                              page: page,
