@@ -1,6 +1,6 @@
 var mongodb = require('./db');
 var crypto = require('crypto');
-
+var async = require('async');
 function User(user) {
                this.name = user.name;
                this.password = user.password;
@@ -22,7 +22,30 @@ User.prototype.save = function (callback) {
                               head: head
                };
 
-               mongodb.open(function (err, db) {
+               async.waterfall(
+                  [function(cb){
+                      mongodb.open(function(err,db){
+                              cb(err,db);
+                      });
+                  },
+                   function(db,cb){
+                      db.collection('users',function(err,collection){
+                              cb(err,collection);
+                      });
+                   },
+                   function(collection,cb){
+                      collection.insert(user, {safe: true}, function (err, user) {
+                                  mongodb.close();
+                                  cb(err,user);
+                                  if (err) {
+                                                 return callback(err);
+                                  }
+                                  callback(err, user[0]);
+                       });
+                   }
+                  ]
+               )
+              /* mongodb.open(function (err, db) {
                               if (err) {
                                              return callback(err);
                               }
@@ -39,13 +62,34 @@ User.prototype.save = function (callback) {
                                                             callback(null, user[0]);
                                              });
                               });
-               });
+               });*/
 };
 
 //Read User info
 User.get = function (name, callback) {
 
-               mongodb.open(function (err, db) {
+               async.waterfall(
+                    [
+                       function(cb){
+                          mongodb.open(function (err, db) {
+                                          cb(err,db)
+                                      }
+                          );
+                       },
+                       function(db,cb){
+                          db.collection('users', function (err, collection){
+                             cb(err,collection);
+                          });
+                       },
+                       function(collection,cb){
+                          collection.findOne({name: name}, function (err, user){
+                             mongodb.close();
+                             cb(err,user);
+                          });
+                       }
+                    ]
+               );
+              /* mongodb.open(function (err, db) {
                               if (err) {
                                              return callback(err);
                               }
@@ -62,5 +106,5 @@ User.get = function (name, callback) {
                                                             callback(null, user);
                                              });
                               });
-               });
+               });*/
 };

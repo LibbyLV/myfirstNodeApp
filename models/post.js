@@ -1,9 +1,28 @@
 /**
  * Created by tianan on 2016-4-15.
  */
-var mongodb = require('./db'),
-               markdown = require('markdown').markdown;
 
+var Db = require('./db');
+var markdown = require('markdown').markdown;
+var poolModule = require('generic-pool');
+var ObjectID = require('mongodb').ObjectID;
+var pool = poolModule.Pool({
+               name: 'mongoPool',
+               create: function (callback) {
+                              var mongodb = Db();
+                              mongodb.open(function (err, db) {
+                                             callback(err, db);
+                              })
+               },
+               destroy: function (mongodb) {
+                              mongodb.close();
+               },
+               max: 100,
+               min: 5,
+               idleTimeoutMillis: 30000,
+               log: true
+
+});
 
 function Post(name, head, title, tags, post) {
                this.name = name;
@@ -40,17 +59,19 @@ Post.prototype.save = function (callback) {
 
                };
 
-               mongodb.open(function (err, db) {
+               pool.acquire(function (err, db) {
                               if (err) {
                                              return callback(err);
                               }
                               db.collection('posts', function (err, collection) {
                                              if (err) {
-                                                            mongodb.close();
+                                                            pool.release(mongodb);
+                                                            //pool.release();
                                                             return callback(err);
                                              }
                                              collection.insert(post, {safe: true}, function (err) {
-                                                            mongodb.close();
+                                                            pool.release(mongodb);
+                                                            //pool.release();
                                                             if (err) {
                                                                            return callback(err);
                                                             }
@@ -62,13 +83,13 @@ Post.prototype.save = function (callback) {
 //读取文章及其相关信息
 Post.getTen = function (name, page, callback) {
 
-               mongodb.open(function (err, db) {
+               pool.acquire(function (err, db) {
                               if (err) {
                                              return callback(err);
                               }
                               db.collection('posts', function (err, collection) {
                                              if (err) {
-                                                            mongodb.close();
+                                                            pool.release();
                                                             return callback(err);
                                              }
                                              var query = {};
@@ -77,7 +98,7 @@ Post.getTen = function (name, page, callback) {
                                              }
                                              collection.count(query, function (err, total) {
                                                             collection.find(query, {skip: (page - 1) * 10, limit: 10}).sort({time: -1}).toArray(function (err, docs) {
-                                                                           mongodb.close();
+                                                                           pool.release();
                                                                            if (err) {
                                                                                           return callback(err);
                                                                            }
@@ -93,33 +114,29 @@ Post.getTen = function (name, page, callback) {
 };
 
 
-Post.getOne = function (name, title, day, callback) {
+Post.getOne = function (_id, callback) {
 
-               mongodb.open(function (err, db) {
+               pool.acquire(function (err, db) {
                               if (err) {
                                              return callback(err);
                               }
                               db.collection('posts', function (err, collection) {
                                              if (err) {
-                                                            mongodb.close();
+                                                            pool.release();
                                                             return callback(err);
                                              }
 
                                              collection.findOne({
-                                                            "name": name,
-                                                            "title": title,
-                                                            "time.day": day
+                                                            "_id": new ObjectID(_id)
                                              }, function (err, doc) {
                                                             if (err) {
-                                                                           //mongodb.close();
+                                                                           //pool.release();
                                                                            return callback(err);
                                                             }
                                                             console.log("doc" + JSON.stringify(doc));
                                                             if (doc) {
                                                                            collection.update({
-                                                                                          "name": name,
-                                                                                          "time.day": day,
-                                                                                          "title": title
+                                                                                          "_id": new ObjectID(_id)
                                                                            }, {$inc: {"pv": 1}}, function (err) {
                                                                                           if (err) {
 
@@ -145,13 +162,13 @@ Post.getOne = function (name, title, day, callback) {
 
 Post.edit = function (name, title, day, callback) {
 
-               mongodb.open(function (err, db) {
+               pool.acquire(function (err, db) {
                               if (err) {
                                              return callback(err);
                               }
                               db.collection('posts', function (err, collection) {
                                              if (err) {
-                                                            mongodb.close();
+                                                            pool.release();
                                                             return callback(err);
                                              }
 
@@ -161,7 +178,7 @@ Post.edit = function (name, title, day, callback) {
                                                             "time.day": day
                                              }, function (err, doc) {
                                                             if (err) {
-                                                                           //mongodb.close();
+                                                                           //pool.release();
                                                                            return callback(err);
                                                             }
                                                             console.log("doc" + doc);
@@ -177,13 +194,13 @@ Post.edit = function (name, title, day, callback) {
 
 Post.update = function (name, title, day, post, callback) {
 
-               mongodb.open(function (err, db) {
+               pool.acquire(function (err, db) {
                               if (err) {
                                              return callback(err);
                               }
                               db.collection('posts', function (err, collection) {
                                              if (err) {
-                                                            mongodb.close();
+                                                            pool.release();
                                                             return callback(err);
                                              }
 
@@ -194,9 +211,9 @@ Post.update = function (name, title, day, post, callback) {
                                              }, {
                                                             $set: {post: post}
                                              }, function (err) {
-                                                            mongodb.close();
+                                                            pool.release();
                                                             if (err) {
-                                                                           //mongodb.close();
+                                                                           //pool.release();
                                                                            return callback(err);
                                                             }
 
@@ -209,13 +226,13 @@ Post.update = function (name, title, day, post, callback) {
 
 Post.remove = function (name, title, day, callback) {
 
-               mongodb.open(function (err, db) {
+               pool.acquire(function (err, db) {
                               if (err) {
                                              return callback(err);
                               }
                               db.collection('posts', function (err, collection) {
                                              if (err) {
-                                                            mongodb.close();
+                                                            pool.release();
                                                             return callback(err);
                                              }
                                              collection.findOne({
@@ -242,7 +259,7 @@ Post.remove = function (name, title, day, callback) {
                                                                                           }
                                                                            }, function (err) {
                                                                                           if (err) {
-                                                                                                         mongodb.close();
+                                                                                                         pool.release();
                                                                                                          return callback(err);
                                                                                           }
                                                                            });
@@ -255,9 +272,9 @@ Post.remove = function (name, title, day, callback) {
                                                             }, {
                                                                            w: 1
                                                             }, function (err) {
-                                                                           mongodb.close();
+                                                                           pool.release();
                                                                            if (err) {
-                                                                                          //mongodb.close();
+                                                                                          //pool.release();
                                                                                           return callback(err);
                                                                            }
                                                                            callback(null);
@@ -270,13 +287,13 @@ Post.remove = function (name, title, day, callback) {
 //返回所有文章存档信息
 Post.getArchive = function (callback) {
 
-               mongodb.open(function (err, db) {
+               pool.acquire(function (err, db) {
                               if (err) {
                                              return callback(err);
                               }
                               db.collection('posts', function (err, collection) {
                                              if (err) {
-                                                            mongodb.close();
+                                                            pool.release();
                                                             return callback(err);
                                              }
 
@@ -287,9 +304,9 @@ Post.getArchive = function (callback) {
                                              }).sort({
                                                             time: -1
                                              }).toArray(function (err, docs) {
-                                                            mongodb.close();
+                                                            pool.release();
                                                             if (err) {
-                                                                           //mongodb.close();
+                                                                           //pool.release();
                                                                            return callback(err);
                                                             }
                                                             console.log("docs is " + docs);
@@ -303,20 +320,20 @@ Post.getArchive = function (callback) {
 
 Post.getTags = function (callback) {
 
-               mongodb.open(function (err, db) {
+               pool.acquire(function (err, db) {
                               if (err) {
                                              return callback(err);
                               }
                               db.collection('posts', function (err, collection) {
                                              if (err) {
-                                                            mongodb.close();
+                                                            pool.release();
                                                             return callback(err);
                                              }
 
                                              collection.distinct("tags", function (err, docs) {
-                                                            mongodb.close();
+                                                            pool.release();
                                                             if (err) {
-                                                                           //mongodb.close();
+                                                                           //pool.release();
                                                                            return callback(err);
                                                             }
                                                             console.log("docs is " + docs);
@@ -328,13 +345,13 @@ Post.getTags = function (callback) {
 };
 //返回含有特定标签的所有文章
 Post.getTag = function (tag, callback) {
-               mongodb.open(function (err, db) {
+               pool.acquire(function (err, db) {
                               if (err) {
                                              return callback(err);
                               }
                               db.collection('posts', function (err, collection) {
                                              if (err) {
-                                                            mongodb.close();
+                                                            pool.release();
                                                             return callback(err);
                                              }
                                              //查询所有 tags 数组内包含 tag 的文档
@@ -348,7 +365,7 @@ Post.getTag = function (tag, callback) {
                                              }).sort({
                                                             time: -1
                                              }).toArray(function (err, docs) {
-                                                            mongodb.close();
+                                                            pool.release();
                                                             if (err) {
                                                                            return callback(err);
                                                             }
@@ -360,13 +377,13 @@ Post.getTag = function (tag, callback) {
 
 
 Post.search = function (keyword, callback) {
-               mongodb.open(function (err, db) {
+               pool.acquire(function (err, db) {
                               if (err) {
                                              return callback(err);
                               }
                               db.collection('posts', function (err, collection) {
                                              if (err) {
-                                                            mongodb.close();
+                                                            pool.release();
                                                             return callback(err);
                                              }
                                              var pattern = new RegExp(keyword, "gi");
@@ -382,7 +399,7 @@ Post.search = function (keyword, callback) {
                                              }).sort({
                                                             time: -1
                                              }).toArray(function (err, docs) {
-                                                            mongodb.close();
+                                                            pool.release();
                                                             if (err) {
                                                                            return callback(err);
                                                             }
@@ -396,13 +413,13 @@ Post.search = function (keyword, callback) {
 
 Post.reprint = function (reprint_from, reprint_to, callback) {
 
-               mongodb.open(function (err, db) {
+               pool.acquire(function (err, db) {
                               if (err) {
                                              return callback(err);
                               }
                               db.collection('posts', function (err, collection) {
                                              if (err) {
-                                                            mongodb.close();
+                                                            pool.release();
                                                             return callback(err);
                                              }
 
@@ -413,7 +430,7 @@ Post.reprint = function (reprint_from, reprint_to, callback) {
                                                             "time.day": reprint_from.day
                                              }, function (err, doc) {
                                                             if (err) {
-                                                                           mongodb.close();
+                                                                           pool.release();
                                                                            return callback(err);
                                                             }
                                                             console.log("doc" + JSON.stringify(doc));
@@ -450,7 +467,7 @@ Post.reprint = function (reprint_from, reprint_to, callback) {
                                                                                           "title": doc.title
                                                                            }}}, function (err) {
                                                                                           if (err) {
-                                                                                                         mongodb.close();
+                                                                                                         pool.release();
                                                                                                          return callback(err);
 
                                                                                           }

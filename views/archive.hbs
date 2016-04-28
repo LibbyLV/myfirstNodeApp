@@ -1,0 +1,15 @@
+<ul class="archive">
+
+        {{#each posts}}
+                {{#showyear @index}}
+                    <li><h3>{{post.time.year}}</h3></li>
+                {{/showyear}}
+            <li>
+                <time>{{post.time.year}}</time>
+            </li>
+            <!--<li><a href="/u/<!%= post.name %>/<!%= post.title %>/<!%= post.time.day %>"><!%= post.title %></a></li>-->
+
+            <li><a href="/u/{{post._id}}">{{post.title}}</a></li>
+        {{/each}}
+</ul>
+

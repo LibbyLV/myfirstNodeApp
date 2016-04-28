@@ -16,7 +16,7 @@ var fs = require('fs');
 var accesslog = fs.createWriteStream('access.log', {flags: 'a'});
 var errorlog = fs.createWriteStream('error.log', {flags: 'a'});
 var app = express();
-
+var exphbs  = require('express-handlebars');
 
 var multer = require('multer');
 app.use(multer({
@@ -30,8 +30,13 @@ app.use(multer({
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
-
+//app.set('view engine', 'ejs');
+app.engine('hbs', exphbs({
+               layoutsDir: 'views',
+               defaultLayout: 'layout',
+               extname: '.hbs'
+}));
+app.set('view engine', 'hbs');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));

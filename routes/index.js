@@ -177,7 +177,14 @@ app.get('/archive', function (req, res) {
                                                                            posts: posts,
                                                                            user: req.session.user,
                                                                            success: req.flash('success').toString(),
-                                                                           error: req.flash('error').toString()
+                                                                           error: req.flash('error').toString(),
+                                                                           helpers:{
+                                                                           showYear: function(index, options) {
+                                                                                          if ((index == 0) || (posts[index].time.year != posts[index - 1].time.year)) {
+                                                                                                         return options.fn(this);
+                                                                                          }
+                                                                           }
+                                                                           }
                                                             }
                                              )
                               }
@@ -285,16 +292,16 @@ app.get('/u/:name', function (req, res) {
                });
 });
 
-app.get('/u/:name/:title/:day', function (req, res) {
+app.get('/u/:_id', function (req, res) {
                //console.log(req.param.name+"-"+ req.param.title+"-"+ req.param.day);
-               Post.getOne(req.params.name, req.params.title, req.params.day, function (err, post) {
+               Post.getOne(req.params._id, function (err, post) {
                               console.log(req.params.title + " " + req.params.day);
                               if (err) {
                                              req.flash('error', err);
                                              return res.redirect('/');
                               }
                               res.render('article', {
-                                             title: req.params.title,
+                                             title: post.title,
                                              post: post,
                                              user: req.session.user,
                                              success: req.flash('success').toString(),
@@ -412,7 +419,9 @@ app.post('/u/:name/:title/:day', function (req, res) {
 
 
 app.use(function(req,res){
-   res.render('404');
+   res.render('404',{
+       layout:false
+   });
 });
 
 
