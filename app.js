@@ -16,6 +16,7 @@ var fs = require('fs');
 var accesslog = fs.createWriteStream('access.log', {flags: 'a'});
 var errorlog = fs.createWriteStream('error.log', {flags: 'a'});
 var app = express();
+var db = require('./models/db');
 var exphbs  = require('express-handlebars');
 
 var multer = require('multer');
@@ -61,12 +62,13 @@ app.use(session({
     secret:settings.cookieSecret,
     key:settings.db,//cookie name
     cookie:{maxAge:1000*60*60*24*30},//30days
-    store:new MongoStore({
-            db: settings.db,
-            host: settings.host,
-            port: settings.port
-        }
-    )
+    url:settings.url
+//    store:new MongoStore({
+//            db: settings.db,
+//            host: settings.host,
+//            port: settings.port
+//        }
+//    )
 }));
 app.use('/', routes);
 app.use('/users', users);

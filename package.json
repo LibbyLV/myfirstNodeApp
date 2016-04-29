@@ -26,6 +26,8 @@
     "fs":"0.0.2",
     "async": "*",
     "generic-pool": "*",
-    "express-handlebars": "*"
-  }
+    "express-handlebars": "*",
+    "mongoose":"*",
+    "mongoose-paginate":"5.0.0"
+}
 }

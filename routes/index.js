@@ -6,20 +6,22 @@ var flash = require('connect-flash');
 var Post = require('../models/post.js');
 var Comment = require('../models/comment.js');
 
+
 /* GET home page. */
 
 app.get('/', function (req, res) {
-               var page = req.query.p ? parseInt(req.query.p) : 1;
-               Post.getTen(null, page, function (err, posts, total) {
+              //var page = req.query.p ? parseInt(req.query.p) : 1;
+              var page = 1;
+               Post.paginate({}, {page:3}, function (err, pageCount, posts,dataCount) {
                               if (err) {
                                              posts = [];
                               }
                               console.log("posts is "+JSON.stringify(posts));
                               res.render('index', { title: '主页',
                                              posts: posts,
-                                             page: page,
+                                             page: pageCount,
                                              isFirstPage: (page - 1) == 0,
-                                             isLastPage: ((page - 1) * 10 + posts.length) == total,
+                                             isLastPage: ((page - 1) * 10 + posts.length) == dataCount,
                                              user: req.session.user,
                                              success: req.flash('success').toString(),
                                              error: req.flash('error').toString()});
@@ -46,7 +48,7 @@ app.post('/login', function (req, res) {
                var md5 = crypto.createHash('md5'),
                               password = md5.update(req.body.password).digest('hex');
                //check user existed?
-               User.get(req.body.name, function (err, user) {
+               User.findOne({name:req.body.name}, function (err, user) {
                               if (err) {
                                              req.flash('error', err);
                                              return res.redirect('/');
@@ -87,7 +89,7 @@ app.post('/reg', function (req, res) {
                               password: password,
                               email: req.body.email
                });
-               User.get(newUser.name, function (err, user) {
+               User.findOne({name:newUser.name}, function (err, user) {
                               console.log(" err");
                               if (err) {
                                              req.flash('error', 'err');
@@ -114,7 +116,7 @@ app.post('/reg', function (req, res) {
                                              }
                                              console.log("come123123");
                                              console.log(req.session);
-                                             req.session.user = newUser;
+                                             req.session.user = user;
                                              console.log("come heare");
                                              //req.flash('success','register success!');
                                              app.use(flash('success', 'OK'));
@@ -167,7 +169,7 @@ app.post('/upload', function (req, res) {
                res.redirect('/upload');
 });
 app.get('/archive', function (req, res) {
-               Post.getArchive(function (err, posts) {
+               Post.paginate({},{page:10},function (err, posts) {
                                              if (err) {
                                                             req.flash('error', err);
                                                             return res.redirect('/')
@@ -194,7 +196,7 @@ app.get('/archive', function (req, res) {
 
 
 app.get('/tags', function (req, res) {
-               Post.getTags(function (err, posts) {
+               Post.distinct('tags',function (err, posts) {
                                              if (err) {
                                                             req.flash('error', err);
                                                             return res.redirect('/')
@@ -245,7 +247,16 @@ app.get('/links', function (req, res) {
 
 
 app.get('/search', function (req, res) {
-               Post.search(req.query.keyword, function (err, posts) {
+               var pattern = new RegExp(req.query.keyword, "gi");
+               Post.find({
+                                             "title": pattern
+                              },{
+                              "name": 1,
+                              "time": 1,
+                              "title": 1
+               }).sort({
+                              time: -1
+               }).exec (function (err, posts) {
                                              if (err) {
                                                             req.flash('error', err);
                                                             return res.redirect('/')

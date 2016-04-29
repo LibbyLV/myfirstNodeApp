@@ -1,6 +1,19 @@
 var mongodb = require('./db');
 var crypto = require('crypto');
 var async = require('async');
+var mongoose = require('mongoose');
+
+var Userchema = new mongoose.Schema({
+    name:String,
+    password:String,
+    email:String,
+    head:String
+},{
+   collection:'users'
+});
+module.exports = mongoose.model('User',Userchema);
+
+/*
 function User(user) {
                this.name = user.name;
                this.password = user.password;
@@ -9,6 +22,7 @@ function User(user) {
 module.exports = User;
 
 //Save User info
+
 User.prototype.save = function (callback) {
                var md5 = crypto.createHash('md5'),
                    email_MD5 = md5.update(this.email.toLowerCase()).digest('hex');
@@ -45,7 +59,8 @@ User.prototype.save = function (callback) {
                    }
                   ]
                )
-              /* mongodb.open(function (err, db) {
+              */
+/* mongodb.open(function (err, db) {
                               if (err) {
                                              return callback(err);
                               }
@@ -62,7 +77,8 @@ User.prototype.save = function (callback) {
                                                             callback(null, user[0]);
                                              });
                               });
-               });*/
+               });*//*
+
 };
 
 //Read User info
@@ -89,7 +105,8 @@ User.get = function (name, callback) {
                        }
                     ]
                );
-              /* mongodb.open(function (err, db) {
+              */
+/* mongodb.open(function (err, db) {
                               if (err) {
                                              return callback(err);
                               }
@@ -106,5 +123,6 @@ User.get = function (name, callback) {
                                                             callback(null, user);
                                              });
                               });
-               });*/
-};
+               });*//*
+
+};*/

@@ -6,6 +6,40 @@ var Db = require('./db');
 var markdown = require('markdown').markdown;
 var poolModule = require('generic-pool');
 var ObjectID = require('mongodb').ObjectID;
+var mongoose = require('mongoose');
+var paginate = require('mongoose-paginate');
+
+
+
+var  PostSchema = new mongoose.Schema({
+               name: String,
+               head: String,
+               title: String,
+               time: Date,
+               post: String,
+               tags: Array,
+               comments: [{
+                              name: String,
+                              head: String,
+                              email: String,
+                              website: String,
+                              time: Date,
+                              content: String
+               }],
+               reprint_info: {
+                    reprint_from :{type:String},
+                    reprint_to : {type:String}
+               },
+               pv: {
+                    type:Number,
+                    default:0
+               }
+});
+
+PostSchema.plugin(paginate);
+module.exports = mongoose.model('Post',PostSchema);
+
+
 var pool = poolModule.Pool({
                name: 'mongoPool',
                create: function (callback) {
