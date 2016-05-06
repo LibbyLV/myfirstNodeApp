@@ -135,8 +135,20 @@ app.post('/post', checkLogin);
 app.post('/post', function (req, res) {
                var currentUser = req.session.user;
                var tags = [req.body.tag1, req.body.tag2, req.body.tag3];
-               var post = new Post(currentUser.name, currentUser.head, req.body.title, tags, req.body.post);
-               post.save(function (err, post) {
+               //var post = new Post(currentUser.name, currentUser.head, req.body.title, tags, req.body.post);
+
+               var post = {
+                      name:currentUser.name,
+                      head:currentUser.head,
+                      title:req.body.title,
+                      tags:tags,
+                      post:req.body.post
+
+
+               };
+
+               var newPost = new Post(post);
+               newPost.save(function (err, post) {
                               if (err) {
                                              req.flash('error', err);
                                              return res.redirect('/');
@@ -216,7 +228,7 @@ app.get('/tags', function (req, res) {
 });
 
 app.get('/tags/:tag', function (req, res) {
-               Post.getTag(req.params.tag, function (err, posts) {
+               Post.find({tag:req.params.tag}, function (err, posts) {
                                              if (err) {
                                                             req.flash('error', err);
                                                             return res.redirect('/')
@@ -278,12 +290,12 @@ app.get('/search', function (req, res) {
 
 app.get('/u/:name', function (req, res) {
                var page = parseInt(req.query.p) || 1;
-               User.get(req.params.name, function (err, user) {
+               User.find(req.params.name, function (err, user) {
                               if (!user) {
                                              req.flash('error', err);
                                              return res.redirect('/');
                               }
-                              Post.getTen(user.name, page, function (err, posts, total) {
+                              Post.paginate(user.name, page,10, function (err, posts, total) {
                                              if (err) {
                                                             req.flash('error', err);
                                                             return res.redirect('/');
@@ -305,25 +317,53 @@ app.get('/u/:name', function (req, res) {
 
 app.get('/u/:_id', function (req, res) {
                //console.log(req.param.name+"-"+ req.param.title+"-"+ req.param.day);
-               Post.getOne(req.params._id, function (err, post) {
-                              console.log(req.params.title + " " + req.params.day);
+               Post.findOne(req.params._id, function (err, post) {
+                              //console.log(req.params.title + " " + req.params.day);
                               if (err) {
                                              req.flash('error', err);
                                              return res.redirect('/');
                               }
-                              res.render('article', {
-                                             title: post.title,
-                                             post: post,
-                                             user: req.session.user,
-                                             success: req.flash('success').toString(),
-                                             error: req.flash('error').toString()
-                              });
+                              Post.update(req.params._id,{"$inc":{"pv":1}},function(err){
+
+                                             if (err) {
+                                                            req.flash('error', err);
+                                                            return res.redirect('/');
+                                             }
+                                             post.forEach(function(e){
+                                                                  post['name']= e.name,
+                                                                  post['head']= e.head,
+                                                                  post['title']= e.title,
+                                                                  post['time']= e.time,
+                                                                  post['post']= e.post,
+                                                                  post['tags']= e.tags,
+                                                                  post['comments']= e.comments,
+                                                                  post['reprint_info']= e.reprint_info,
+                                                                  post['pv']= e.pv
+                                             });
+                                             res.render('article', {
+                                                            title: post.title,
+                                                            post: post,
+                                                            user: req.session.user,
+                                                            success: req.flash('success').toString(),
+                                                            error: req.flash('error').toString()
+                                             });
+                              })
                });
 });
 app.get('/edit/:name/:title/:day', checkLogin);
 app.get('/edit/:name/:title/:day', function (req, res) {
                var currrentUser = req.session.user;
-               Post.edit(currrentUser.name, req.params.title, req.params.day, function (err, post) {
+               var condition = {};
+               if(req.params.name){
+                              condition['name'] = new RegExp(req.params.name,'gi');
+               }
+               if(req.params.day){
+                              condition['day'] = new RegExp(req.params.day,'gi');
+               }
+               if(req.params.title){
+                              condition['title'] = new RegExp(req.params.title,'gi');
+               }
+               Post.find(condition, function (err, post) {
                               //console.log(req.params.title+" "+req.params.day );
                               if (err) {
                                              req.flash('error', err);
@@ -342,7 +382,17 @@ app.get('/edit/:name/:title/:day', function (req, res) {
 app.post('/edit/:name/:title/:day', checkLogin);
 app.post('/edit/:name/:title/:day', function (req, res) {
                var currrentUser = req.session.user;
-               Post.update(currrentUser.name, req.params.title, req.params.day, req.body.post, function (err) {
+               var condition ={};
+               if(req.params.name){
+                              condition['name'] = new RegExp(req.params.name,'gi');
+               }
+               if(req.params.day){
+                              condition['day'] = new RegExp(req.params.day,'gi');
+               }
+               if(req.params.title){
+                              condition['title'] = new RegExp(req.params.title,'gi');
+               }
+               Post.update(condition,{$set:{"post":req.body.post}}, function (err) {
                               var url = encodeURI('/u/' + req.params.name + '/' + req.params.title + '/' + req.params.day);
                               if (err) {
                                              req.flash('error', err);
@@ -370,7 +420,20 @@ app.get('/remove/:name/:title/:day', function (req, res) {
 
 app.get('/reprint/:name/:day/:title',checkLogin);
 app.get('/reprint/:name/:day/:title',function(req,res) {
-               Post.edit(req.params.name, req.params.title, req.params.day, function (err, post) {
+
+
+               var condition = {};
+               if(req.params.name){
+                   condition['name'] = new RegExp(req.params.name,'gi');
+               }
+               if(req.params.day){
+                   condition['day'] = new RegExp(req.params.day,'gi');
+               }
+               if(req.params.title){
+                   condition['title'] = new RegExp(req.params.title,'gi');
+               }
+
+               Post.findOne(condition, function (err, post) {
                               if (err) {
                                              req.flash('error', err);
                                              return res.redirect('back');
@@ -384,15 +447,45 @@ app.get('/reprint/:name/:day/:title',function(req,res) {
                                              name: currentUser.name,
                                              head: currentUser.head
                               };
-                              Post.reprint(reprint_from, reprint_to, function (err, post) {
+                              var date = new Date(),
+                                             time = {
+                                                            date: date,
+                                                            year: date.getFullYear(),
+                                                            month: date.getFullYear() + "-" + date.getMonth(),
+                                                            day: date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate(),
+                                                            minute: date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate() + " " + date.getHours() + ":" +
+                                                                           (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes())
+
+                                             };
+                                             post.name = reprint_to.name,
+                                             post.head = reprint_to.head,
+                                             post.time = time,
+                                             post.title = (post.title.search(/[转载]/) > -1) ? post.title : "[转载]" + post.title,
+                                             post.comments = [],
+                                             post.reprint_info = {"reprint_from": reprint_from},
+                                             post.pv = 0;
+
+
+                              Post.update(reprint_from,{$push: {"reprint_info.reprint_to": {
+                                             "name": post.name,
+                                             "day": time.day,
+                                             "title": post.title
+                              }}},function (err, post) {
                                              if (err) {
                                                             req.flash('error', err);
                                                             return res.redirect('back');
                                              }
-                                             req.flash('success', '转载成功!');
-                                             var url = encodeURI('/u/' + post.name + '/' + post.title + '/' + post.time.day);
-                                             //跳转到转载后的文章页面
-                                             res.redirect(url);
+                                             post.save(function(err){
+                                                            if (err) {
+                                                                           return err;
+                                                            }
+                                                            req.flash('success', '转载成功!');
+                                                            var url = encodeURI('/u/' + post.name + '/' + post.title + '/' + post.time.day);
+                                                            //跳转到转载后的文章页面
+                                                            res.redirect(url);
+
+                                             })
+
                               })
                });
 });
@@ -414,17 +507,36 @@ app.post('/u/:name/:title/:day', function (req, res) {
                               time: time,
                               content: req.body.content
                };
-               var newComment = new Comment(req.params.name, req.params.title, req.params.day, comment);
+               var condition = {};
+               if(req.params.name){
+                              condition['name'] = new RegExp(req.params.name,'gi');
+               }
+               if(req.params.day){
+                              condition['day'] = new RegExp(req.params.day,'gi');
+               }
+               if(req.params.title){
+                              condition['title'] = new RegExp(req.params.title,'gi');
+               }
+               var newComment = new Comment(condition,comment);
 
                newComment.save(function (err) {
                               if (err) {
                                              req.flash('error', 'err');
                                              return res.redirect('/');
                               }
-                              console.log("comment is " + JSON.stringify(comment));
-                              req.flash('success', 'REPLY OK');
-                              //req.flash('success', po);
-                              res.redirect('/');
+                              Post.update(condition, {
+                                             $push: {"comments": comment}
+                              },function(err){
+                                             if (err) {
+                                                            req.flash('error', 'err');
+                                                            return res.redirect('/');
+                                             }
+                                             console.log("comment is " + JSON.stringify(comment));
+                                             req.flash('success', 'REPLY OK');
+                                             //req.flash('success', po);
+                                             res.redirect('/');
+                              });
+
                });
 });
 

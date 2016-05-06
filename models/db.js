@@ -7,7 +7,7 @@ module.exports=function(){
 return new Db(settings.db,new Server(settings.host,settings.port),{safe:true,poolSize:1});
 }*/
 
-
+var mongoose = require('mongoose');
 var db = function (){
      mongoose.connect('mongodb://localhost/blog');
 };

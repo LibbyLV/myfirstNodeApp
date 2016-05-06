@@ -2,10 +2,10 @@
  * Created by tianan on 2016-4-15.
  */
 
-var Db = require('./db');
-var markdown = require('markdown').markdown;
-var poolModule = require('generic-pool');
-var ObjectID = require('mongodb').ObjectID;
+//var Db = require('./db');
+//var markdown = require('markdown').markdown;
+//var poolModule = require('generic-pool');
+//var ObjectID = require('mongodb').ObjectID;
 var mongoose = require('mongoose');
 var paginate = require('mongoose-paginate');
 
@@ -40,7 +40,7 @@ PostSchema.plugin(paginate);
 module.exports = mongoose.model('Post',PostSchema);
 
 
-var pool = poolModule.Pool({
+/*var pool = poolModule.Pool({
                name: 'mongoPool',
                create: function (callback) {
                               var mongodb = Db();
@@ -457,7 +457,7 @@ Post.reprint = function (reprint_from, reprint_to, callback) {
                                                             return callback(err);
                                              }
 
-                                             //找到被转载的文章的原文档/*
+                                             //找到被转载的文章的原文档*//*
                                              collection.findOne({
                                                             "name": reprint_from.name,
                                                             "title": reprint_from.title,
@@ -523,7 +523,7 @@ Post.reprint = function (reprint_from, reprint_to, callback) {
                                              });
                               });
                });
-};
+};*/
 
 
 
